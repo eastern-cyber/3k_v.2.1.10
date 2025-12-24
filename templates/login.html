@@ -157,8 +157,10 @@
                 this.error = '';
                 
                 try {
-                    // Test API endpoint - adjust URL based on your setup
-                    const response = await fetch('/api/auth/login', {
+                    const apiUrl = 'http://localhost:3001/api/auth/login';
+                    console.log('Attempting login to:', apiUrl);
+                    
+                    const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -169,7 +171,18 @@
                         })
                     });
                     
+                    console.log('Response status:', response.status);
+                    
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const text = await response.text();
+                        console.error('Non-JSON response:', text.substring(0, 200));
+                        throw new Error('Server returned: ' + text.substring(0, 100));
+                    }
+                    
                     const data = await response.json();
+                    console.log('Response data:', data);
                     
                     if (response.ok && data.success) {
                         // Store authentication data
@@ -180,25 +193,29 @@
                             localStorage.setItem('user_data', JSON.stringify(data.user));
                         }
                         
-                        // Redirect to home/dashboard
-                        window.location.href = '/templates/home.html';
+                        // Show success message
+                        this.error = '✅ Login successful!';
+                        
+                        // IMPORTANT: Redirect to your ACTUAL domain, not localhost
+                        setTimeout(() => {
+                            // Use your actual domain instead of localhost
+                            window.location.href = 'https://3k214.dfi.fund/templates/home.html';
+                        }, 1000);
+                        
                     } else {
                         this.error = data.message || 'Invalid email or password';
                     }
                 } catch (error) {
-                    console.error('Login error:', error);
+                    console.error('Login error details:', error);
                     
-                    // For testing without backend
-                    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                        this.error = 'Backend server not running. Starting in demo mode...';
-                        // Demo mode - simulate successful login
-                        setTimeout(() => {
-                            localStorage.setItem('demo_user', 'true');
-                            localStorage.setItem('demo_email', this.email);
-                            window.location.href = '/templates/home.html';
-                        }, 1000);
+                    // Check error type
+                    if (error.message.includes('Failed to fetch') || 
+                        error.message.includes('NetworkError') ||
+                        error.message.includes('CORS')) {
+                        
+                        this.error = 'Connection error. Please check backend server.';
                     } else {
-                        this.error = 'Connection error. Please try again.';
+                        this.error = 'Error: ' + error.message;
                     }
                 } finally {
                     this.loading = false;
