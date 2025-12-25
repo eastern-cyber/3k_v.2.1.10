@@ -162,11 +162,11 @@
                     `<span class="status-online">✅ Online (${data.database || 'connected'})</span>`;
             } else {
                 document.getElementById('backendStatus').innerHTML = 
-                    '<span class="status-offline">❌ Offline - Health check failed!</span>';
+                    '<span class="status-offline">❌ Offline - Health check failed.</span>';
             }
         } catch (error) {
             document.getElementById('backendStatus').innerHTML = 
-                '<span class="status-offline">❌ Offline - Local connection is not established!</span>';
+                '<span class="status-offline">❌ Offline - Local connection is not established.</span>';
             console.error('Backend connection test failed:', error);
         }
     }
