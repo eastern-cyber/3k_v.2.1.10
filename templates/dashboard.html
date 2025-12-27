@@ -178,9 +178,9 @@
         
         <div>
             <button onclick="logout()" class="btn btn-logout">ล็อกเอ้าท์</button>
-            <a href="/" class="btn" style="background: #1c4162;">กลับหน้าหลัก</a>
-            <a href="/home.html" class="btn" style="background: #4099e7;">เข้าสู่แอ๊พ</a>
-            <a href="/login.html" class="btn" style="background: #566a7b;">ล็อกอินอีกครั้ง</a>
+            <a href="/templates/" class="btn" style="background: #1c4162;">กลับหน้าหลัก</a>
+            <a href="/templates/home.html" class="btn" style="background: #4099e7;">เข้าสู่แอ๊พ</a>
+            <a href="/templates/login.html" class="btn" style="background: #566a7b;">ล็อกอินอีกครั้ง</a>
         </div>
         
         <div class="status-box">
@@ -212,7 +212,7 @@
             console.log('No token found, redirecting to login...');
             showMessage('No authentication token found. Redirecting to login...', 'error');
             setTimeout(() => {
-                window.location.href = '/login.html';
+                window.location.href = '/templates/login.html';
             }, 2000);
             return false;
         }
@@ -294,7 +294,7 @@
             if (!token) {
                 showMessage('Session expired. Please login again.', 'error');
                 setTimeout(() => {
-                    window.location.href = '/login.html';
+                    window.location.href = '/templates/login.html';
                 }, 1000);
                 return;
             }
@@ -321,7 +321,7 @@
                 localStorage.clear();
                 showMessage('Session expired. Please login again.', 'error');
                 setTimeout(() => {
-                    window.location.href = '/login.html';
+                    window.location.href = '/templates/login.html';
                 }, 1000);
                 return;
             }
@@ -481,7 +481,7 @@
             localStorage.removeItem('backend_port');
             
             alert('Logged out successfully!');
-            window.location.href = '/login.html';
+            window.location.href = '/templates/login.html';
         }
     }
 

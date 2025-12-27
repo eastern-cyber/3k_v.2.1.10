@@ -124,7 +124,7 @@
 
         <footer>
             <div class="text-center p-5 border-t border-neutral-300">
-                <p>ยังไม่ได้เป็นสมาชิก? <a href="/signup.html" class="text-rose-500 font-medium hover:underline">ลงทะเบียน</a></p>
+                <p>ยังไม่ได้เป็นสมาชิก? <a href="/templates/signup.html" class="text-rose-500 font-medium hover:underline">ลงทะเบียน</a></p>
             </div>
             <div class="bg-black text-neutral-400 h-21 flex items-center justify-end px-36 text-sm">
                 <p>© 2025 KokKokKok</p>
@@ -213,7 +213,7 @@
                         // Redirect to dashboard
                         setTimeout(() => {
                             // Use absolute URL to avoid redirect issues
-                            window.location.href = 'https://3k214.dfi.fund/dashboard.html';
+                            window.location.href = 'https://3k214.dfi.fund/templates/dashboard.html';
                         }, 1000);
                     } else {
                         this.error = data.message || 'Invalid email or password';
@@ -263,7 +263,7 @@
         btn.disabled = true;
         
         setTimeout(() => {
-            window.location.href = '/home.html';
+            window.location.href = '/templates/home.html';
         }, 1000);
         
         return false; // Prevent form submission
