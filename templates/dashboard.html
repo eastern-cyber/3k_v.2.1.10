@@ -117,6 +117,9 @@
                                     style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
                                     👁️
                                 </button>
+                                <button onclick="testChangePasswordAPI()" class="btn" style="background: #9C27B0; font-size: 12px; padding: 5px 10px;">
+                                    🧪 Test Change Password API
+                                </button>
                             </div>
                         </div>
                         
@@ -613,6 +616,9 @@
             
             const messageDiv = document.getElementById('passwordChangeMessage');
             
+            // Clear previous messages
+            messageDiv.innerHTML = '';
+            
             // Validation
             if (!currentPassword || !newPassword || !confirmPassword) {
                 messageDiv.innerHTML = '<span style="color: red;">กรุณากรอกข้อมูลให้ครบทุกช่อง</span>';
@@ -638,10 +644,10 @@
             const token = localStorage.getItem('token') || localStorage.getItem('user_token');
             
             if (!token) {
-                showMessage('Session expired. Please login again.', 'error');
+                messageDiv.innerHTML = '<span style="color: red;">❌ ไม่พบโทเคน กรุณาล็อกอินอีกครั้ง</span>';
                 setTimeout(() => {
                     window.location.href = '/templates/login.html';
-                }, 1000);
+                }, 2000);
                 return;
             }
             
@@ -652,9 +658,11 @@
             const backendUrl = getBackendUrl();
             const apiUrl = `${backendUrl}/api/auth/change-password`;
             console.log('🔐 Changing password via:', apiUrl);
+            console.log('🔐 Token exists:', !!token);
             
             // Send change password request
-            const response = await fetch(apiUrl, {
+            // Replace the fetch call with:
+            const response = await safeFetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -667,34 +675,48 @@
             });
             
             console.log('📥 Response status:', response.status);
+            console.log('📥 Response headers:', [...response.headers.entries()]);
             
-            // Check if endpoint exists
-            if (response.status === 404) {
-                messageDiv.innerHTML = '<span style="color: red;">❌ Change password endpoint not found on server</span>';
-                console.error('Endpoint 404: Make sure /api/auth/change-password is implemented on server');
-                return;
-            }
+            // Get response text
+            const responseText = await response.text();
+            console.log('📥 Raw response:', responseText.substring(0, 500));
             
-            // Handle response
+            // Handle different status codes
             if (response.status === 401) {
+                // Token expired or invalid
+                messageDiv.innerHTML = '<span style="color: red;">❌ โทเคนหมดอายุ กรุณาล็อกอินอีกครั้ง</span>';
                 localStorage.clear();
-                showMessage('Session expired. Please login again.', 'error');
                 setTimeout(() => {
                     window.location.href = '/templates/login.html';
-                }, 1000);
+                }, 2000);
                 return;
             }
             
-            // Get response text first
-            const responseText = await response.text();
-            console.log('📥 Raw response:', responseText.substring(0, 200));
+            if (response.status === 400) {
+                // Bad request (validation error)
+                try {
+                    const data = JSON.parse(responseText);
+                    const errorMsg = data.message || 'ข้อมูลไม่ถูกต้อง';
+                    messageDiv.innerHTML = `<span style="color: red;">❌ ${errorMsg}</span>`;
+                } catch {
+                    messageDiv.innerHTML = '<span style="color: red;">❌ ข้อมูลไม่ถูกต้อง</span>';
+                }
+                return;
+            }
             
+            if (response.status === 404) {
+                // Endpoint not found
+                messageDiv.innerHTML = '<span style="color: red;">❌ ไม่พบฟังก์ชันเปลี่ยนรหัสผ่านบนเซิร์ฟเวอร์</span>';
+                return;
+            }
+            
+            // Try to parse JSON response
             let data;
             try {
                 data = JSON.parse(responseText);
             } catch (parseError) {
                 console.error('❌ JSON parse error:', parseError);
-                messageDiv.innerHTML = '<span style="color: red;">❌ Server returned invalid response</span>';
+                messageDiv.innerHTML = '<span style="color: red;">❌ เซิร์ฟเวอร์ตอบกลับข้อมูลไม่ถูกต้อง</span>';
                 return;
             }
             
@@ -710,6 +732,12 @@
                 setTimeout(() => {
                     clearPasswordFields();
                     cancelPasswordChange();
+                    
+                    // Optional: Ask user to login again
+                    if (confirm('เปลี่ยนรหัสผ่านสำเร็จ! ต้องการล็อกอินใหม่ด้วยรหัสผ่านใหม่หรือไม่?')) {
+                        localStorage.clear();
+                        window.location.href = '/templates/login.html';
+                    }
                 }, 1500);
                 
             } else {
@@ -727,7 +755,70 @@
         } catch (error) {
             console.error('Change password error:', error);
             document.getElementById('passwordChangeMessage').innerHTML = 
-                `<span style="color: red;">❌ เกิดข้อผิดพลาด: ${error.message}</span>`;
+                `<span style="color: red;">❌ เกิดข้อผิดพลาดในการเชื่อมต่อ: ${error.message}</span>`;
+        }
+    }
+
+    // Helper function to handle fetch errors
+    async function safeFetch(url, options = {}) {
+        try {
+            const response = await fetch(url, options);
+            
+            // Check for network errors
+            if (!response.ok && response.status === 0) {
+                throw new Error('Network error - check internet connection');
+            }
+            
+            return response;
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
+        }
+    }
+
+    async function testChangePasswordAPI() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('No token found');
+            return;
+        }
+        
+        console.log('Testing change password API...');
+        console.log('Token (first 30 chars):', token.substring(0, 30) + '...');
+        
+        const testData = {
+            currentPassword: 'test123',
+            newPassword: 'newtest123'
+        };
+        
+        try {
+            const response = await fetch('/api/auth/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(testData)
+            });
+            
+            console.log('Response status:', response.status);
+            console.log('Response headers:', [...response.headers.entries()]);
+            
+            const text = await response.text();
+            console.log('Response text:', text);
+            
+            try {
+                const data = JSON.parse(text);
+                console.log('Parsed response:', data);
+                alert(`Result: ${response.status}\n\n${JSON.stringify(data, null, 2)}`);
+            } catch (e) {
+                console.error('Parse error:', e);
+                alert(`Status: ${response.status}\n\n${text.substring(0, 200)}`);
+            }
+            
+        } catch (error) {
+            console.error('Test error:', error);
+            alert('Error: ' + error.message);
         }
     }
 
