@@ -12,3 +12,10 @@ def explore_view(request):
         'page': 'Explore',
     }
     return render(request, 'a_posts/explore.html', context)
+
+
+def upload_view(request):
+    context = {
+        'page': 'Upload',
+    }
+    return render(request, 'a_posts/upload.html', context)

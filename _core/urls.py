@@ -24,6 +24,7 @@ urlpatterns = [
     path('', home_view, name="home"),
     path('admin/', admin.site.urls),
     path('explore/', explore_view, name="explore"),
+    path('upload/', upload_view, name="upload"),
 ]
 
 if settings.DEBUG:
