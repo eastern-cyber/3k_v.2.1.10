@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     
     # My apps
     'a_posts',
+    'a_users',
     
     # Third party
     'django_browser_reload',
@@ -134,3 +135,5 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'a_users.CustomUser'

@@ -1,8 +1,11 @@
 from django.shortcuts import render
+from .models import Post
 
 def home_view(request):
+    posts = Post.objects.all()
     context = {
         'page': 'Home',
+        'posts': posts,
         'partial': request.htmx,
     }
     if request.htmx:

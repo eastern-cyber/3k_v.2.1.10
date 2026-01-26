@@ -1,28 +1,85 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.templatetags.static import static
-from django_resized import ResizedImageField
+from django.conf import settings
+from django.urls import reverse
+import uuid
 
-class CustomUser(AbstractUser):
-    name = models.CharField(max_length=30, null=True, blank=True)
-    image = ResizedImageField(size=[600, 600], quality=75, upload_to='avatars/', null=True, blank=True)
-    bio = models.TextField(blank=True, null=True)
-    website = models.CharField(max_length=250, null=True, blank=True)
-    birthday = models.DateField(blank=True, null=True)
-    notifications = models.BooleanField(default=True)
-    darkmode = models.BooleanField(default=False)
+class Post(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
+    image = models.ImageField(upload_to='posts/')
+    body = models.CharField(max_length=80, null=True, blank=True)
+    tags = models.CharField(max_length=80, null=True, blank=True)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="likedposts", through="LikedPost")
+    bookmarks = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="bookmarkedposts", through="BookmarkedPost")
+    reposts = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='repostedposts', through='Repost')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    @property
+    def parent_comments(self):
+        return self.comments.filter(parent_comment__isnull=True)
+    
+    class Meta:
+        ordering = ['-created_at'] 
     
     def __str__(self):
-        return self.username
+        return str(self.uuid) 
     
-    @property
-    def avatar(self):
-        if self.image:
-            return self.image.url
-        return static('images/avatar.svg')
+    def get_absolute_url(self):
+        return reverse('post_page', kwargs={'pk': self.uuid})
     
-    @property
-    def website_link(self):
-        if self.website and not self.website.startswith(('http://', 'https://')):
-            return f'http://{self.website}'
-        return self.website
+    
+class LikedPost(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at'] 
+        unique_together = ('user', 'post')
+        
+        
+class BookmarkedPost(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at'] 
+        unique_together = ('user', 'post')
+        
+        
+class Repost(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at'] 
+        unique_together = ('user', 'post')
+        
+        
+class Comment(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+    post = models.ForeignKey('Post', related_name='comments', on_delete=models.CASCADE)
+    parent_comment = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+    parent_reply = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
+    body = models.CharField(max_length=250)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="likedcomments", through="LikedComment")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"Comment by {self.author} | {self.created_at.strftime('%b %d, %Y')} | {self.uuid}" 
+    
+    
+class LikedComment(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at'] 
+        unique_together = ('user', 'comment')
