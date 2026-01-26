@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from pathlib import Path
 import dj_database_url
 
 from pathlib import Path
@@ -164,3 +165,29 @@ if os.environ.get('RAILWAY') or os.environ.get('RENDER'):
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+# Production settings for Railway
+import os
+import dj_database_url
+
+# Database
+if "DATABASE_URL" in os.environ:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+
+# Static files
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Security
+if "RAILWAY" in os.environ:
+    DEBUG = False
+    ALLOWED_HOSTS = ["*"]
+    # Add whitenoise middleware
+    if "whitenoise.middleware.WhiteNoiseMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
