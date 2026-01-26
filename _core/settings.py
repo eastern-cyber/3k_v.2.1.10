@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'a_users',
     
     # Third party
+    'django_browser_reload',
     'django_htmx',
 ]
 
@@ -190,3 +191,28 @@ if "RAILWAY" in os.environ:
     # Add whitenoise middleware
     if "whitenoise.middleware.WhiteNoiseMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+
+# Safety check for missing packages
+import sys
+
+# List of optional packages that might not be installed
+OPTIONAL_APPS = [
+    'django_browser_reload',
+    'django_htmx',
+    'debug_toolbar',
+]
+
+# Remove any optional apps that aren't installed
+for app in OPTIONAL_APPS:
+    if app in INSTALLED_APPS:
+        try:
+            __import__(app)
+        except ImportError:
+            INSTALLED_APPS.remove(app)
+            print(f"Removed {app} from INSTALLED_APPS (package not installed)", file=sys.stderr)
+
+# Production settings import
+try:
+    from prod_settings import *
+except ImportError:
+    pass
