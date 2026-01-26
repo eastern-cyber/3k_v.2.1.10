@@ -1,0 +1,9 @@
+package.json
+package-lock.json
+yarn.lock
+node_modules/
+3kv_frontend/
+venv/
+.venv/
+__pycache__/
+*.pyc
