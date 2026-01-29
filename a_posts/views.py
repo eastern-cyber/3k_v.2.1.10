@@ -1,14 +1,28 @@
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 from .forms import PostForm
 from .models import Post
 
 def home_view(request):
     posts = Post.objects.order_by('-created_at')
+    
+    paginator = Paginator(posts, 1)
+    page_number = int(request.GET.get('page_number', 1))
+    posts_page = paginator.get_page(page_number)
+    next_page = posts_page.next_page_number() if posts_page.has_next() else None
+    page_start_index = (posts_page.number -1) * paginator.per_page
+    
     context = {
         'page': 'Home',
-        'posts': posts,
-        'partial': request.htmx,
+        'posts': posts_page,
+        'next_page': next_page,
+        'page_start_index': page_start_index,
+        'partial': request.htmx,        
     }
+    
+    if request.GET.get('paginator'):
+        return render(request, 'a_posts/partials/_posts.html', context)
+    
     if request.htmx:
         return render(request, 'a_posts/partials/_home.html', context)
     return render(request, 'a_posts/home.html', context)
