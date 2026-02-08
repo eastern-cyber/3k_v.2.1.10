@@ -87,13 +87,18 @@
             รับส่งข้อความ
         </span>
     </button>
-    <button id="profile" @click="window.location.href = 'profile.html'" class="button-nav dark:hover:!bg-neutral-800">
+    <button id="profile"
+            hx-get="{% if user.is_authenticated %}{% url 'profile' user.username %}{% endif %}"
+            hx-target="#main-content"
+            hx-swap="innerHTML transition:true"
+            hx-push-url="true"
+            class="button-nav dark:hover:!bg-neutral-800">
         <div class="size-8 flex-shrink-0">
             <div class="rounded-full size-7 overflow-hidden">
-                <img src="{{ user.image.url }}" class="w-full h-full object-cover object-center">
+                <img src="{{ user.avatar }}" class="w-full h-full object-cover object-center">
             </div>
         </div>
-        <span :class="{ '!opacity-0' : showDrawer }">
+        <span {% if page == 'Profile' and user == profile_user %}class="text-rose-500"{% endif %} :class="{ '!opacity-0' : showDrawer }">
             รายละเอียดผู้ใช้งาน
         </span>
     </button>

@@ -5,6 +5,6 @@ from .models import CustomUser
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {'fields': ('name', 'image', 'bio', 'birthday')}),    
+        (None, {'fields': ('name', 'image', 'bio', 'website', 'birthday')}),    
     ) + UserAdmin.fieldsets # type: ignore
     list_display = ('username', 'name', 'email', 'is_staff')

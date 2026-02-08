@@ -15,7 +15,7 @@
         <article-info class="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
             <div class="absolute bottom-0 p-5 text-white z-10">
                 {% if post.author %}
-                <a href="" class="hover:underline pointer-events-auto">{{ post.author }}</a>
+                <a href="{% url 'profile' post.author.username %}" class="hover:underline pointer-events-auto">{{ post.author }}</a>
                 {% endif %}
                 {% if post.tags %}
                 <div class="mt-1">
@@ -31,9 +31,9 @@
         <article-buttons class="absolute -right-17 bottom-0 flex flex-col gap-2">
             {% if post.author %}
             <button id="author" class="relative cursor-pointer flex justify-center mb-4">
-                <div class="rounded-full size-13 bg-neutral-100 overflow-hidden">
-                    <img src="{{ post.author.image.url }}" class="w-full h-full object-center object-cover">
-                </div>
+                <a href="{% url 'profile' post.author.username %}" class="rounded-full size-13 bg-neutral-100 overflow-hidden">
+                    <img src="{{ post.author.avatar }}" class="w-full h-full object-center object-cover">
+                </a>
                 <div class="absolute bg-rose-500 hover:bg-rose-600 size-6 rounded-full top-10 flex items-center justify-center">
                     <div class="size-3.5 fill-white">
                         <svg viewBox="0 0 48 48">

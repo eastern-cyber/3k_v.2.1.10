@@ -48,10 +48,10 @@
                     </article-info>
                 </div>
             </button>
-            <a href="" class="block my-3">
+            <a href="{% url 'profile' post.author.username %}" class="block my-3">
                 <div class="flex items-center gap-1">
                     <div class="rounded-full size-6 flex items-center justify-center overflow-hidden">
-                        <img src="{{ post.author.image.url }}" class="w-full h-full object-cover">
+                        <img src="{{ post.author.avatar }}" class="w-full h-full object-cover">
                     </div>
                     <span class="hover:underline">
                         {{ post.author }}
