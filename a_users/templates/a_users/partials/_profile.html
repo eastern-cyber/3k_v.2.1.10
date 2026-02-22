@@ -101,16 +101,21 @@
                             <span class="hidden sm:block">รีโพสต์</span>
                         </div>
                     </button>
-                    <button @click="selectedTab = 'favorites'" class="px-4 xl:px-7 pb-2 border-b-2" :class="selectedTab === 'favorites' ? 'border-black dark:border-white' : 'text-neutral-500 fill-neutral-500 border-transparent'">
-                        <div class="flex items-center gap-2 justify-center">
-                            <div class="size-5 shrink-0">
-                                <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-                                </svg>
+                    {% if user == profile_user %}
+                    <button hx-get="{% url 'profile' profile_user.username %}?bookmarked=true"
+                            hx-target="#bookmarked-container"
+                            hx-swap="innerHTML"
+                            @click="selectedTab = 'favorites'" class="px-4 xl:px-7 pb-2 border-b-2" :class="selectedTab === 'favorites' ? 'border-black dark:border-white' : 'text-neutral-500 fill-neutral-500 border-transparent'">
+                            <div class="flex items-center gap-2 justify-center">
+                                <div class="size-5 shrink-0">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                                    </svg>
+                                </div>
+                                <span class="hidden sm:block">โพสต์ที่ท่านบันทึกไว้</span>
                             </div>
-                            <span class="hidden sm:block">โพสต์ที่ท่านบันทึกไว้</span>
-                        </div>
                     </button>
+                    {% endif %}
                     <button @click="selectedTab = 'liked'"
                             hx-get="{% url 'profile' profile_user.username %}?liked=true"
                             hx-target="#liked-container"
@@ -176,12 +181,7 @@
                     </div>
                 </div>
                 <div x-show="selectedTab === 'favorites'" x-cloak >
-                    <div class="text-center pt-32">
-                        <div class="font-bold text-2xl">โพสต์ยอดนิยม</div>
-                        {% if profile_user == user %}
-                        <div class="mt-2">โพสต์ยอดนิยมของท่านจะปรากฏตรงนี้</div>
-                        {% endif %}
-                    </div>
+                    <div id="bookmarked-container"></div>                    
                 </div>
                 <div x-show="selectedTab === 'liked'" x-cloak >
                     <div id="liked-container"></div>
